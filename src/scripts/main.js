@@ -1,19 +1,53 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const focusableElements = document.querySelectorAll('.focusable');
-    const defaultPrimary = document.querySelector('.content-article');
-    
-    function setPrimary(element) {
-        focusableElements.forEach(el => el.classList.remove('primary'));
-        element.classList.add('primary');
+class FocusManager {
+    constructor() {
+        this.focusableElements = null;
+        this.defaultPrimary = null;
+        this.currentPrimary = null;
+        this.init();
     }
-    
-    focusableElements.forEach(element => {
-        element.addEventListener('mouseenter', function() {
-            setPrimary(this);
-        });
+
+    init() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setup());
+        } else {
+            this.setup();
+        }
+    }
+
+    setup() {
+        try {
+            this.focusableElements = document.querySelectorAll('.focusable');
+            this.defaultPrimary = document.querySelector('.content-article');
+            
+            if (!this.defaultPrimary) {
+                console.warn('FocusManager: Default primary element not found');
+                return;
+            }
+
+            this.bindEvents();
+            this.setPrimary(this.defaultPrimary);
+        } catch (error) {
+            console.error('FocusManager setup failed:', error);
+        }
+    }
+
+    setPrimary(element) {
+        if (!element || element === this.currentPrimary) return;
         
-        element.addEventListener('mouseleave', function() {
-            setPrimary(defaultPrimary);
+        this.focusableElements.forEach(el => el.classList.remove('primary'));
+        element.classList.add('primary');
+        this.currentPrimary = element;
+    }
+
+    bindEvents() {
+        this.focusableElements.forEach(element => {
+            element.addEventListener('mouseenter', () => this.setPrimary(element), { passive: true });
+            element.addEventListener('mouseleave', () => this.setPrimary(this.defaultPrimary), { passive: true });
+            
+            element.addEventListener('focus', () => this.setPrimary(element), { passive: true });
+            element.addEventListener('blur', () => this.setPrimary(this.defaultPrimary), { passive: true });
         });
-    });
-});
+    }
+}
+
+new FocusManager();

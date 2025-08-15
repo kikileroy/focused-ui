@@ -1,3 +1,22 @@
+:root {
+    --primary-color: #000000;
+    --bg-color: #efefef;
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-hover-bg: rgba(255, 255, 255, 0.18);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --border-glass-hover: rgba(255, 255, 255, 1);
+    --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+    --gradient-bg: linear-gradient(135deg, rgba(255, 192, 203, 0.3), rgba(173, 216, 230, 0.3), rgba(144, 238, 144, 0.3), rgba(255, 255, 224, 0.3));
+    --nav-width: 15%;
+    --content-width: 70%;
+    --border-radius: 20px;
+    --border-radius-small: 12px;
+    --transition-fast: 0.2s ease-out;
+    --transition-standard: 0.3s ease;
+    --blur-effect: blur(20px) saturate(1.2);
+}
+
 /* Reset and base styles */
 * {
     margin: 0;
@@ -9,10 +28,11 @@ body {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
     letter-spacing: -0.2px;
-    color: #000000;
-    background-color: #fffaf7;
+    color: var(--primary-color);
+    background-color: var(--bg-color);
     height: 100vh;
     overflow: hidden;
+    contain: layout style;
 }
 
 body.hero-bg {
@@ -27,15 +47,20 @@ body.hero-bg {
     display: flex;
     height: 100vh;
     width: 100vw;
+    min-width: 800px;
 }
 
-/* Side navigation */
-.side-nav {
-    width: auto;
-    padding: 0px;
+/* Navigation containers */
+.left-nav,
+.right-nav {
+    width: var(--nav-width);
+    height: 100vh;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    contain: layout style;
 }
 
 .nav-list {
@@ -44,18 +69,26 @@ body.hero-bg {
     flex-direction: column;
     gap: 24px;
     padding: 20px;
-    margin-left: 40px;
-    border: 1px solid #ececec;
-    border-radius: 20px;
-    box-shadow: none;
+    margin: 0 20px;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    box-shadow: 
+        var(--shadow-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
     transform: scale(0.98);
-    transition: all 1s ease-out 1s;
-    background-color: #ffffff32;
+    transition: all var(--transition-standard) 0.1s;
+    background-color: transparent;
+    backdrop-filter: var(--blur-effect);
+    -webkit-backdrop-filter: var(--blur-effect);
+    will-change: transform, border-color, background-color;
 }
 
 .nav-list:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     transform: scale(1);
+    border-color: var(--border-glass-hover);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-item {
@@ -65,9 +98,66 @@ body.hero-bg {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    color: #000000;
+    border-radius: var(--border-radius-small);
+    transition: all var(--transition-standard);
+    color: var(--primary-color);
+    position: relative;
+    isolation: isolate;
+    background: none;
+    border: none;
+    will-change: color;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background: var(--gradient-bg);
+    filter: blur(1px);
+    opacity: 0;
+    transition: opacity var(--transition-standard);
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-effect);
+    -webkit-backdrop-filter: var(--blur-effect);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        0 1px 4px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-glass);
+    opacity: 0;
+    transition: all var(--transition-standard);
+}
+
+.nav-item:hover::before {
+    opacity: 1;
+}
+
+.nav-item:hover::after {
+    opacity: 1;
+    background: var(--glass-hover-bg);
+    box-shadow: 
+        var(--shadow-hover),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.nav-item:hover {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.right-nav .nav-item {
+    justify-content: flex-end;
 }
 
 .nav-item svg {
@@ -75,11 +165,48 @@ body.hero-bg {
     height: 16px;
     color: currentColor;
     flex-shrink: 0;
+    z-index: 1;
 }
 
-.nav-item:hover {
-    background-color: #007AFF;
-    color: #ffffff;
+/* Keyboard focus styles */
+.nav-item:focus,
+.top-nav-item:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+    border-radius: var(--border-radius-small);
+}
+
+.nav-item:focus:not(:focus-visible),
+.top-nav-item:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .nav-item,
+    .top-nav-item {
+        border: 1px solid;
+    }
+
+    .focusable {
+        opacity: 0.6;
+    }
+
+    .focusable.primary {
+        opacity: 1;
+        border: 2px solid;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
 
 /* Main content area */
@@ -87,6 +214,7 @@ body.hero-bg {
     flex: 1;
     display: flex;
     flex-direction: column;
+    contain: layout style;
 }
 
 /* Top navigation */
@@ -95,6 +223,7 @@ body.hero-bg {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
 }
 
 .top-nav-list {
@@ -104,9 +233,9 @@ body.hero-bg {
 }
 
 .top-nav-item {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,22 +243,21 @@ body.hero-bg {
     font-size: 16px;
     position: relative;
     isolation: isolate;
-    box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.2);
     border: none;
     background: none;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transition: all 0.2s ease;
+    color: rgba(0, 0, 0, 0.7);
+    transition: all var(--transition-standard);
+    will-change: color;
 }
 
 .top-nav-item::before {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 0;
-    border-radius: 20px;
-    box-shadow: inset 0 0 15px -5px rgba(0, 0, 0, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
+    z-index: -2;
+    border-radius: inherit;
+    background: var(--gradient-bg);
+    filter: blur(1px);
 }
 
 .top-nav-item::after {
@@ -137,20 +265,37 @@ body.hero-bg {
     position: absolute;
     inset: 0;
     z-index: -1;
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    border-radius: inherit;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-effect);
+    -webkit-backdrop-filter: var(--blur-effect);
+    box-shadow: 
+        var(--shadow-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-glass);
 }
 
-.top-nav-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.3);
+.top-nav-item:hover::after {
+    background: var(--glass-hover-bg);
+    box-shadow: 
+        var(--shadow-hover),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.top-nav-item svg {
+    width: 20px;
+    height: 20px;
+    color: currentColor;
+    z-index: 1;
 }
 
 /* Focused UI */
 .focusable {
     opacity: 0.2;
-    transition: opacity 1s ease-out;
+    transition: opacity var(--transition-fast);
+    will-change: opacity;
 }
 
 .focusable.primary {
@@ -158,16 +303,28 @@ body.hero-bg {
 }
 
 /* Content article */
+.main-content {
+    width: var(--content-width);
+    display: flex;
+    flex-direction: column;
+    contain: layout style;
+}
+
 .content-article {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 40px;
-    margin-left: 200px;
+    padding: 40px 25% 40px 25%;
     text-align: left;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-article::-webkit-scrollbar {
+    display: none;
 }
 
 .article-header h1 {
@@ -175,6 +332,15 @@ body.hero-bg {
     font-size: 32px;
     letter-spacing: -0.2px;
     margin-bottom: 24px;
+    color: #000000;
+}
+
+.article-body h2 {
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.2px;
+    margin-top: 32px;
+    margin-bottom: 16px;
     color: #000000;
 }
 
